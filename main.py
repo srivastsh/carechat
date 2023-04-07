@@ -4,6 +4,14 @@ from streamlit_chat import message
 
 openai.api_key = st.secrets["api_key"]
 
+hide_streamlit_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 st.title("CareChat")
 
 if 'generated' not in st.session_state:
