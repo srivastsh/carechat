@@ -26,7 +26,6 @@ def query(messages):
         messages=messages
     )
     return response.choices[0].text.strip()
-
 def get_text():
     input_text = st.text_input("Patient: ")
     return input_text
