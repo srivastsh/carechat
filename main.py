@@ -1,5 +1,5 @@
 import streamlit as st
-import openai
+from openai import ChatCompletion
 from streamlit_chat import message
 
 openai.api_key = st.secrets["api_key"]
@@ -20,14 +20,10 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-def query(prompt):
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=150,
-        n=1,
-        stop=None,
-        temperature=0.5,
+def query(messages):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages
     )
     return response.choices[0].text.strip()
 
@@ -39,9 +35,16 @@ user_input = get_text()
 submit_button = st.button("Ask")
 
 if submit_button and user_input:
-    context = "\n".join([f"Patient: {msg}" if i % 2 == 0 else f"Therapist: {msg}" for i, msg in enumerate(st.session_state['past'] + st.session_state['generated'])])
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."}
+    ]
 
-    response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
+    for i, msg in enumerate(st.session_state['past'] + st.session_state['generated']):
+        role = "Patient" if i % 2 == 0 else "Therapist"
+        messages.append({"role": role, "content": msg})
+
+    messages.append({"role": "Patient", "content": user_input})
+    response = query(messages)
 
     st.session_state.past.append(user_input)
     st.session_state.generated.append(response)
