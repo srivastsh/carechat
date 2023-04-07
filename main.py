@@ -21,7 +21,7 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def query(messages):
-    response = openai.ChatCompletion.create(
+    response = openai.Completion.create(  # Use the correct method: Completion.create()
         model="gpt-3.5-turbo",
         messages=messages
     )
