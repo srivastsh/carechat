@@ -15,6 +15,7 @@ def hide_style():
 st.markdown(hide_style(), unsafe_allow_html=True)
 
 st.title("CareChat")
+st.write("Welcome to CareChat, an AI-powered therapy chatbot. Enter your messages below to get started.")
 
 if 'generated' not in st.session_state:
     st.session_state['generated'] = []
