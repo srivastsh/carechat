@@ -20,10 +20,14 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-def query(messages):
-    response = openai.Completion.create(  # Use the correct method: Completion.create()
-        model="gpt-3.5-turbo",
-        messages=messages
+def query(prompt):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=150,
+        n=1,
+        stop=None,
+        temperature=0.5,
     )
     return response.choices[0].text.strip()
 
@@ -35,16 +39,9 @@ user_input = get_text()
 submit_button = st.button("Ask")
 
 if submit_button and user_input:
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."}
-    ]
+    context = "\n".join([f"Patient: {msg}" if i % 2 == 0 else f"Therapist: {msg}" for i, msg in enumerate(st.session_state['past'] + st.session_state['generated'])])
 
-    for i, msg in enumerate(st.session_state['past'] + st.session_state['generated']):
-        role = "Patient" if i % 2 == 0 else "Therapist"
-        messages.append({"role": role, "content": msg})
-
-    messages.append({"role": "Patient", "content": user_input})
-    response = query(messages)
+    response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
 
     st.session_state.past.append(user_input)
     st.session_state.generated.append(response)
