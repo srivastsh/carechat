@@ -1,5 +1,6 @@
 import streamlit as st
 import openai
+from streamlit_chat import message
 
 openai.api_key = st.secrets["api_key"]
 
@@ -19,43 +20,34 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-def query(messages):
-    api_requestor_instance = openai.api_requestor.APIRequestor(api_key=openai.api_key)
-    response, _, _ = api_requestor_instance.request(
-        method="post",
-        path="/v1/chat/completions",
-        data={
-            "model": "gpt-3.5-turbo",
-            "messages": messages,
-            "max_tokens": 150,
-            "temperature": 0.7,
-        }
+def query(prompt):
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=150,
+        n=1,
+        stop=None,
+        temperature=0.5,
     )
-    return response["choices"][0]["message"]["content"].strip()
+    return response.choices[0].text.strip()
 
 def get_text():
-    input_text = st.text_input("You: ")
+    input_text = st.text_input("Patient: ")
     return input_text
 
 user_input = get_text()
 submit_button = st.button("Ask")
 
 if submit_button and user_input:
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant."}
-    ]
+    context = "\n".join([f"Patient: {msg}" if i % 2 == 0 else f"Therapist: {msg}" for i, msg in enumerate(st.session_state['past'] + st.session_state['generated'])])
 
-    for i, msg in enumerate(st.session_state['past'] + st.session_state['generated']):
-        role = "user" if i % 2 == 0 else "assistant"
-        messages.append({"role": role, "content": msg})
-
-    messages.append({"role": "user", "content": user_input})
-    response = query(messages)
+    response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
 
     st.session_state.past.append(user_input)
     st.session_state.generated.append(response)
 
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated']) - 1, -1, -1):
-        st.write(f"AI assistant: {st.session_state['generated'][i]}", key=str(i))
-        st.write(f"You: {st.session_state['past'][i]}", key=str(i) + '_user')
+        message(st.session_state["generated"][i], key=str(i))
+        message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
+
