@@ -15,7 +15,6 @@ def hide_style():
 st.markdown(hide_style(), unsafe_allow_html=True)
 
 st.title("CareChat")
-st.write("Welcome to CareChat, an AI-powered therapy chatbot. Enter your messages below to get started.")
 
 if 'generated' not in st.session_state:
     st.session_state['generated'] = []
@@ -52,7 +51,8 @@ if submit_button and user_input:
     st.session_state.past.append(user_input)
     st.session_state.generated.append(response)
 
-    text_input_placeholder.text_input("Patient: ", value="", key="user_input")
+    text_input_placeholder_2 = st.empty()  # Create a new text input widget with a different key
+    text_input_placeholder_2.text_input("Patient: ", value="", key="user_input_2")
 
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated']) - 1, -1, -1):
