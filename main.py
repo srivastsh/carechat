@@ -20,7 +20,8 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def query(messages):
-    response = openai.api_requestor._create_api_request(
+    api_requestor_instance = openai.api_requestor.APIRequestor(api_key=openai.api_key)
+    response, _, _ = api_requestor_instance.request(
         method="post",
         path="/v1/chat/completions",
         data={
