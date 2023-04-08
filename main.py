@@ -20,9 +20,14 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def query(messages):
-    response = openai.ChatCompletion.create(
+    prompt = 'You are a helpful assistant.\n\n' + '\n\n'.join([f"{msg['role']}: {msg['content']}" for msg in messages])
+    response = openai.Completion.create(
         model="gpt-3.5-turbo",
-        messages=messages
+        prompt=prompt,
+        max_tokens=150,
+        n=1,
+        stop=None,
+        temperature=0.7
     )
     return response.choices[0].text.strip()
 
