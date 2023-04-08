@@ -1,16 +1,18 @@
-import streamlit as st
 import openai
+import streamlit as st
 from streamlit_chat import message
 
 openai.api_key = st.secrets["api_key"]
 
-hide_streamlit_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+def hide_style():
+    return """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        </style>
+        """
+
+st.markdown(hide_style(), unsafe_allow_html=True)
 
 st.title("CareChat")
 
@@ -48,5 +50,5 @@ if submit_button and user_input:
 
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated']) - 1, -1, -1):
-        message(st.session_state["generated"][i], key=str(i))
-        message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
+        message(st.session_state["generated"][i], key=f"{i}")
+        message(st.session_state['past'][i], is_user=True, key=f"{i}_user")
