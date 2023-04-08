@@ -2,76 +2,60 @@ import openai
 import streamlit as st
 from streamlit_chat import message
 
-# Set up the OpenAI API key
+# Set up OpenAI API key
 openai.api_key = st.secrets["api_key"]
 
-
+# Hide Streamlit menu and footer
 def hide_style():
-    # Hides the Streamlit menu and footer
     return """
         <style>
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         </style>
         """
-
-
 st.markdown(hide_style(), unsafe_allow_html=True)
 
-# Add a brief explanation of the app
+# Set up title and explanation
 st.title("CareChat")
-st.write("Welcome to CareChat, an AI-powered therapy chatbot. Enter your messages below to get started.")
+st.write("Welcome to CareChat, a therapy chatbot powered by OpenAI's GPT-3. This chatbot is designed to help you talk through your thoughts and feelings in a safe, non-judgmental environment. Simply type your message in the text box below and hit 'Ask' to get started.")
 
-
+# Set up session state for past messages and generated responses
 if 'generated' not in st.session_state:
     st.session_state['generated'] = []
-
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-
+# Define function to query OpenAI API
 def query(prompt):
-    # Send a query to the OpenAI API and return the response
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=prompt,
-        max_tokens=200,  # Increase the number of max_tokens for longer responses
+        max_tokens=150,
         n=1,
         stop=None,
-        temperature=0.7,  # Try adjusting the temperature for different responses
+        temperature=0.5,
     )
     return response.choices[0].text.strip()
 
-
-def get_text():
-    # Get the user's input from the text input widget
-    input_text = st.text_input("Patient: ")
-    return input_text
-
-
-# Add some shadow text to the text input box for better visual cue
+# Set up text input widget for user input
 text_input_placeholder = st.empty()
-user_input = text_input_placeholder.text_input("Patient: ", value="", key="user_input", placeholder="Type your message here...")
+user_input = text_input_placeholder.text_input("Type your message here...", key="user_input")
 
+# Set up submit button
 submit_button = st.button("Ask")
 
+# Process user input and generate response
 if submit_button and user_input:
     context = "\n".join([f"Patient: {msg}" if i % 2 == 0 else f"Therapist: {msg}" for i, msg in
                          enumerate(st.session_state['past'] + st.session_state['generated'])])
-
-    try:
-        response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
-    except Exception as e:
-        st.write(f"Error: {e}")
-        response = "Sorry, there was an error processing your message."
-
+    response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
     st.session_state.past.append(user_input)
     st.session_state.generated.append(response)
-
     # Clear the text input after the message is submitted
-    text_input_placeholder.text_input("Patient: ", value="", key="user_input")
+    text_input_placeholder.text_input("Type your message here...", value="", key="user_input")
 
+# Display past messages and generated responses
 if st.session_state['generated']:
     for i in range(len(st.session_state['generated']) - 1, -1, -1):
-        message(st.session_state["generated"][i], key=f"{i}")
-        message(st.session_state['past'][i], is_user=True, key=f"{i}_user")
+        message(st.session_state["generated"][i], key=f"{i}", is_shadow=True)
+        message(st.session_state['past'][i], is_user=True, key=f"{i}_user", is_shadow=True)
