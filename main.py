@@ -72,4 +72,6 @@ if submit_button and user_input:
     text_input_placeholder.text_input("Patient: ", value="", key="user_input")
 
 if st.session_state['generated']:
-    for i in range(len(st.session_state['generated']) - 1,
+    for i in range(len(st.session_state['generated']) - 1, -1, -1):
+        message(st.session_state["generated"][i], key=f"{i}")
+        message(st.session_state['past'][i], is_user=True, key=f"{i}_user")
