@@ -4,7 +4,6 @@ from streamlit_chat import message
 
 openai.api_key = st.secrets["api_key"]
 
-
 def hide_style():
     return """
         <style>
@@ -13,17 +12,8 @@ def hide_style():
         </style>
         """
 
-
-st.markdown(hide_style(), unsafe_allow_html=True)
-
-st.title("CareChat")
-
-if 'generated' not in st.session_state:
-    st.session_state['generated'] = []
-
-if 'past' not in st.session_state:
-    st.session_state['past'] = []
-
+def format_message(i, msg):
+    return f"Patient: {msg}" if i % 2 == 0 else f"Therapist: {msg}"
 
 def query(prompt):
     response = openai.Completion.create(
@@ -36,31 +26,33 @@ def query(prompt):
     )
     return response.choices[0].text.strip()
 
+def main():
+    st.markdown(hide_style(), unsafe_allow_html=True)
+    st.title("CareChat")
 
-def get_text():
-    input_text = st.text_input("Patient: ")
-    return input_text
+    st.session_state.setdefault('generated', [])
+    st.session_state.setdefault('past', [])
 
+    text_input_placeholder = st.empty()
+    user_input = text_input_placeholder.text_input("Patient: ")
 
-# Placeholder for the text input widget
-text_input_placeholder = st.empty()
-user_input = text_input_placeholder.text_input("Patient: ")
+    submit_button = st.button("Ask")
 
-submit_button = st.button("Ask")
+    if submit_button and user_input:
+        context = "\n".join([format_message(i, msg) for i, msg in enumerate(st.session_state['past'] + st.session_state['generated'])])
 
-if submit_button and user_input:
-    context = "\n".join([f"Patient: {msg}" if i % 2 == 0 else f"Therapist: {msg}" for i, msg in
-                         enumerate(st.session_state['past'] + st.session_state['generated'])])
+        response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
 
-    response = query(f"{context}\nPatient: {user_input}\nTherapist: ")
+        st.session_state.past.append(user_input)
+        st.session_state.generated.append(response)
 
-    st.session_state.past.append(user_input)
-    st.session_state.generated.append(response)
+        # Clear the text input after the message is submitted
+        text_input_placeholder.text_input("Patient: ", value="", key="user_input")
 
-    # Clear the text input after the message is submitted
-    text_input_placeholder.text_input("Patient: ", value="", key="user_input")
+    if st.session_state['generated']:
+        for i in range(len(st.session_state['generated']) - 1, -1, -1):
+            message(st.session_state["generated"][i], key=f"{i}")
+            message(st.session_state['past'][i], is_user=True, key=f"{i}_user")
 
-if st.session_state['generated']:
-    for i in range(len(st.session_state['generated']) - 1, -1, -1):
-        message(st.session_state["generated"][i], key=f"{i}")
-        message(st.session_state['past'][i], is_user=True, key=f"{i}_user")
+if __name__ == "__main__":
+    main()
