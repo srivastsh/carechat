@@ -14,11 +14,11 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.title("CareChat")
 
-# Add a description of the app
 st.write("""
-CareChat is an AI-powered chatbot designed to assist healthcare professionals in providing
-support and guidance to their patients. The chatbot leverages OpenAI's GPT-4 to generate 
-meaningful and contextually relevant responses based on the user's input.
+CareChat is an AI-powered chatbot designed to serve as a virtual therapist, providing users
+with someone to listen and offer support. The chatbot leverages OpenAI's GPT-4 to generate 
+meaningful and contextually relevant responses based on the user's input, creating a safe
+space for users to express their thoughts and feelings.
 """)
 
 if 'generated' not in st.session_state:
@@ -39,7 +39,6 @@ def query(prompt):
     return response.choices[0].text.strip()
 
 def get_text():
-    # Modify the text input field with a placeholder
     input_text = st.text_input("", placeholder="How are you feeling?")
     return input_text
 
