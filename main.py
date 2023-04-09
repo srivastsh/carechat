@@ -14,6 +14,13 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 st.title("CareChat")
 
+# Add a description of the app
+st.write("""
+CareChat is an AI-powered chatbot designed to assist healthcare professionals in providing
+support and guidance to their patients. The chatbot leverages OpenAI's GPT-4 to generate 
+meaningful and contextually relevant responses based on the user's input.
+""")
+
 if 'generated' not in st.session_state:
     st.session_state['generated'] = []
 
