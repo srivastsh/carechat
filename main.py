@@ -39,7 +39,8 @@ def query(prompt):
     return response.choices[0].text.strip()
 
 def get_text():
-    input_text = st.text_input("Patient: ")
+    # Modify the text input field with a placeholder
+    input_text = st.text_input("", placeholder="How are you feeling?")
     return input_text
 
 user_input = get_text()
